@@ -614,8 +614,10 @@ length(badY)
 tAll[badY,c('Plot','Num','Y_cm','Y_cm.13','Y_cm.18','Y_cm.19','Y_cm.20')]
 write.csv(tAll[c(badX,badY),c('Plot','Num','Quad','X_cm','Y_cm','X_cm.13','X_cm.18','X_cm.19','X_cm.20','Y_cm.13','Y_cm.18','Y_cm.19','Y_cm.20')],'tmp/badXY.csv')
 
+mXorY <- which(is.na(tAll$X_cm) | is.na(tAll$Y_cm))
+
 tAll$coordOutlier <- 0
-tAll$coordOutlier[c(badX,badY)] <- 1
+tAll$coordOutlier[c(badX,badY,mXorY)] <- 1
 ## Now calculate PX, PX - position relative to plot origin, in m
 table(tAll$Quad,useNA='a')
 qc <- c('A', 'B', 'C', 'D', '1', '2', '3', '4')

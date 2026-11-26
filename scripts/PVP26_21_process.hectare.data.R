@@ -373,17 +373,24 @@ for (i in 1:length(plot.list)) {
 }
 
 table(htAll$Subplot.17)
-htAll$coordOutlier[which(substr(htAll$Subplot.17,2,2) %in% c(0,9))] <- 1
+
+# outliers classified as more than 3 m from the adjusted edge
+htAll$coordOutlier[which(htAll$Rel.UTM.E.17<c(-3) | 
+                     htAll$Rel.UTM.E.17>103 |
+                     htAll$Rel.UTM.N.17<c(-3) |
+                       htAll$Rel.UTM.N.17>103)] <- 1
+
+htAll$coordOutlier[which(is.na(htAll$Rel.UTM.E.17) |
+                           is.na(htAll$Rel.UTM.N.17))] <- 1
 table(htAll$coordOutlier)
-htAll$coordOutlier[which(substr(htAll$Subplot.17,1,1) %in% c('L','M'))] <- 1
 table(htAll$coordOutlier,htAll$ExcStem)
 
 # plot relative location of all trees
 plot(Rel.UTM.N.17~Rel.UTM.E.17,data=htAll[which(htAll$ExcStem==0),],asp=1)
-abline(h=c(0,100))
-abline(v=c(0,100))
+abline(h=c(0,100));abline(v=c(0,100))
+points(Rel.UTM.N.17~Rel.UTM.E.17,data=htAll[which(htAll$ExcStem==0 & htAll$coordOutlier==1),],col='red',pch=19)
 
-# output file with outliers - most are within 5 m of edge and not considered an issue
+# output file with outliers
 write.csv(htAll[which(htAll$coordOutlier==1),c('Plot','Num','Species','Rel.UTM.E.17','Rel.UTM.N.17','UTM.E.15','UTM.N.15','UTM.E.18','UTM.N.18')],'tmp/hectCoordOutliers.csv')
 
 # Now move near outliers to nearest plot and create Subplot.Orig vars
