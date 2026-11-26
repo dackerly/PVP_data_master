@@ -25,7 +25,7 @@ source_https('https://raw.githubusercontent.com/dackerly/PepperwoodVegPlots/mast
 
 # read in list of 4 data frames, each one with the full data file for all trees in a given year. We are using individual points for analysis in this paper (hence 'allidb.Rdata')
 years <- c(2013,2018,2019,2020)
-all.id <- readRDS('data/allidb.rds')
+all.id <- readRDS('bigdata/allidb.rds')
 str(all.id)
 
 # Print dups for each year. And for now, remove dups before checking for other problems, e.g. moving between plots, species, etc.
@@ -60,7 +60,7 @@ for (i in 2:4) bNA <- rbind(bNA,all.id[[i]][which(is.na(all.id[[i]]$bSprout)),])
 dim(bNA)
 head(bNA)
 table(bNA$sYear)
-write.csv(bNA,'data/bSprout-NAs.csv')
+write.csv(bNA,'tmp/bSprout-NAs.csv')
 
 ## Seems there are problems with gCrown - checking here
 table(all.id[[1]]$gCrown,useNA='always') # GOOD
@@ -168,7 +168,7 @@ allNames <- sort(c(allIndv$S13,allIndv$S18,allIndv$S19,allIndv$S20))
 table(allNames)
 
 spNames <- sort(unique(allNames))
-write.csv(spNames,'data/all-spp-names.csv')
+write.csv(spNames,'tmp/all-spp-names.csv')
 
 ## This data.frame may be quite useful for quickly identifying problem individuals. 
 
@@ -193,11 +193,11 @@ head(allIndv$nSp)
 allIndv[which(allIndv$nSp>1),]
 
 # write entire indvData for use in next steps
-head(allIndv)
-write.csv(allIndv,'data/allIndv.csv')
+#head(allIndv)
+#write.csv(allIndv,'bigdata/allIndv.csv')
 
 # save copy of all.id object, with changes made to this point
-saveRDS(all.id,'data/allid-nodups.rds')
+#saveRDS(all.id,'bigdata/allid-nodups.rds')
 
 # how many trees have BD but not DBH
 nodbh <- which(!is.na(all.id[[1]]$SA.BD_cm) & is.na(all.id[[1]]$DBH_cm))
@@ -548,7 +548,7 @@ eastness <- function(asp,slp,units='deg') {
   sin(asp)*sin(slp)
 }
 
-plotInfo <- read.csv('data/plot.info.2026.csv')
+plotInfo <- read.csv('indata/plot.info.2026.csv')
 head(plotInfo)
 plotInfo$northness <- northness(plotInfo$Aspect.true,plotInfo$Slope)
 plotInfo$eastness <- eastness(plotInfo$Aspect.true,plotInfo$Slope)
@@ -612,7 +612,7 @@ tAll[badX,c('Plot','Num','X_cm','X_cm.13','X_cm.18','X_cm.19','X_cm.20')]
 badY <- which(tAll$Y_cm < 0 | tAll$Y_cm>500)
 length(badY)
 tAll[badY,c('Plot','Num','Y_cm','Y_cm.13','Y_cm.18','Y_cm.19','Y_cm.20')]
-write.csv(tAll[c(badX,badY),c('Plot','Num','Quad','X_cm','Y_cm','X_cm.13','X_cm.18','X_cm.19','X_cm.20','Y_cm.13','Y_cm.18','Y_cm.19','Y_cm.20')],'data/badXY.csv')
+write.csv(tAll[c(badX,badY),c('Plot','Num','Quad','X_cm','Y_cm','X_cm.13','X_cm.18','X_cm.19','X_cm.20','Y_cm.13','Y_cm.18','Y_cm.19','Y_cm.20')],'tmp/badXY.csv')
 
 tAll$coordOutlier <- 0
 tAll$coordOutlier[c(badX,badY)] <- 1
@@ -680,5 +680,5 @@ substr(tAll$Plot,4,5) <- '13'
 ## ADD FIRE SEVERITY HERE, FOR TUBBS AND KINCADE
 
 # Save the updated data file
-write.csv(tAll,'data/tAllPlot.csv')
+write.csv(tAll,'bigdata/tAllPlot.csv')
 
