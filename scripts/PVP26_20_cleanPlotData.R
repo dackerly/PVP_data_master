@@ -678,6 +678,33 @@ tAll$Plot.Orig <- tAll$Plot
 substr(tAll$Plot,4,5) <- '13'
 
 ## ADD FIRE SEVERITY HERE, FOR TUBBS AND KINCADE
+###### Add fire severity data
+fs <- read.csv("indata/vegplots-54-20m-FS.csv")
+head(fs)
+tail(fs)
+dim(fs)
+
+fs <- loadFireSeverity(fs,'Tubbs.MTBS.RDNBR.30',verbose=T)
+head(fs)
+head(fs[,c('Plot','fsvar','fsCat')])
+tail(fs[,c('Plot','fsvar','fsCat')])
+table(fs$fsCat)
+
+table(fs$fsCat)
+
+# add fire severity to tAll
+table(tAll$Plot,useNA='always')
+table(tAll$Plot.Orig,useNA='always')
+fs$Plot.Orig <- fs$Plot
+substr(fs$Plot,4,5) <- '13'
+tAll$Tubbs.MTBS.RDNBR.Cat <- NA
+tAll$Tubbs.MTBS.RDNBR.Cat <- fs$fsCat[match(tAll$Plot,fs$Plot)]
+table(tAll$Tubbs.MTBS.RDNBR.Cat,useNA='always')
+
+tAll$Tubbs.MTBS.RDNBR <- NA
+tAll$Tubbs.MTBS.RDNBR <- fs$fsvar[match(tAll$Plot,fs$Plot)]
+hist(tAll$Tubbs.MTBS.RDNBR)
+boxplot(Tubbs.MTBS.RDNBR~Tubbs.MTBS.RDNBR.Cat,data=tAll)
 
 # Save the updated data file
 write.csv(tAll,'bigdata/tmp/tAllPlot.csv')

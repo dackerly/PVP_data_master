@@ -442,10 +442,36 @@ names(htAll)[which(names(htAll)=='Rel.UTM.N.17')] <- 'Rel.UTM.N'
 names(htAll)[which(names(htAll)=='UTM.E.17')] <- 'UTM.E'
 names(htAll)[which(names(htAll)=='UTM.N.17')] <- 'UTM.N'
 
+# transfer fire severity by subplot
 htAll$Plot.Orig <- htAll$Plot.Orig.15
 htAll$Plot.Orig[which(is.na(htAll$Plot.Orig))] <- htAll$Plot.Orig.18[which(is.na(htAll$Plot.Orig))]
 table(htAll$Plot.Orig,useNA='a')
 
+hfs <- read.csv('indata/hectares-18-20m-FS.csv')
+hfs$Plot.Orig <- hfs$Plot
+substr(hfs$Plot,4,5) <- '13'
+names(hfs)[which(names(hfs)=='Quad')] <- 'Subplot'
+head(hfs)
+
+hfs <- loadFireSeverity(hfs,'Tubbs.MTBS.RDNBR.30',verbose=F)
+head(hfs)
+table(hfs$fsCat)
+
+# summary statistics for fire severity by plots
+table(hfs$fsCat,hfs$Plot)
+
+# transfer to hectare trees table
+htAll$PSp <- NA
+htAll$PSp <- paste(htAll$Plot,htAll$Subplot.17[which(htAll$Survey=='Hect')])
+hfs$PSp <- paste(hfs$Plot,hfs$Subplot)
+length(which(!htAll$PSp %in% hfs$PSp))
+htAll$Tubbs.MTBS.RDNBR.Cat <- hfs$fsCat[match(htAll$PSp,hfs$PSp)]
+table(htAll$Tubbs.MTBS.RDNBR.Cat,useNA='always')
+
+htAll$Tubbs.MTBS.RDNBR <- NA
+htAll$Tubbs.MTBS.RDNBR <- hfs$fsvar[match(htAll$Plot,hfs$Plot)]
+hist(htAll$Tubbs.MTBS.RDNBR)
+boxplot(Tubbs.MTBS.RDNBR~Tubbs.MTBS.RDNBR.Cat,data=htAll)
 
 ## SAVE
 saveRDS(htAll,'bigdata/tmp/hectares.rds')

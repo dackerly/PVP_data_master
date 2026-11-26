@@ -32,7 +32,8 @@ names(htAll)
 dim(htAll)
 
 allNames <- union(names(tAll),names(htAll))
-sharedNames <- intersect(names(tAll),names(htAll))
+(sharedNames <- intersect(names(tAll),names(htAll)))
+
 length(allNames)
 length(sharedNames)
 sharedNames
@@ -59,55 +60,6 @@ table(pw$Plot.Orig,pw$Survey)
 table(pw$Live.17,pw$Survey,useNA='always')
 table(pw$Dead.17,pw$Live.17,pw$Survey,useNA='always')
 pw$Dead.17 <- pw$Live.17-1 # fixed missing Dead value for hectare plants
-
-###### Add fire severity data
-# Manual load from csvs disabled, as this was moved to function
-fs <- read.csv("indata/vegplots-54-20m-FS.csv")
-head(fs)
-tail(fs)
-dim(fs)
-
-fs <- loadFireSeverity(fs,'Tubbs.MTBS.RDNBR.30',verbose=T)
-head(fs)
-head(fs[,c('Plot','fsvar','fsCat')])
-tail(fs[,c('Plot','fsvar','fsCat')])
-table(fs$fsCat)
-
-hfs <- read.csv('indata/hectares-18-20m-FS.csv')
-hfs$Plot.Orig <- hfs$Plot
-substr(hfs$Plot,4,5) <- '13'
-names(hfs)[which(names(hfs)=='Quad')] <- 'Subplot'
-head(hfs)
-
-hfs <- loadFireSeverity(hfs,'Tubbs.MTBS.RDNBR.30',verbose=F)
-head(hfs)
-table(hfs$fsCat)
-
-# transfer fire severity to pw
-# assign plot and hectare rows
-pRows <- which(pw$Survey=='Plot')
-hRows <- which(pw$Survey=='Hect')
-
-# summary statistics for fire severity by plots
-table(fs$fsCat)
-table(hfs$fsCat,hfs$Plot)
-
-# add fire severity to tAll
-table(pw$Plot,useNA='always')
-table(pw$Plot.Orig,useNA='always')
-fs$Plot.Orig <- fs$Plot
-substr(fs$Plot,4,5) <- '13'
-pw$fsCat <- NA
-pw$fsCat[pRows] <- fs$fsCat[match(pw$Plot[pRows],fs$Plot)]
-table(pw$fsCat[pRows],useNA='always')
-
-pw$PSp <- NA
-pw$PSp[hRows] <- paste(pw$Plot[hRows],pw$Subplot.17[which(pw$Survey=='Hect')])
-hfs$PSp <- paste(hfs$Plot,hfs$Subplot)
-length(which(!pw$PSp[hRows] %in% hfs$PSp))
-pw$fsCat[hRows] <- hfs$fsCat[match(pw$PSp[hRows],hfs$PSp)]
-table(pw$fsCat[hRows],useNA='always')
-table(pw$fsCat,useNA='always')
 
 ### Read in species codes - in this script, called 'Species'
 spAtt <- read.csv("https://raw.githubusercontent.com/dackerly/PepperwoodVegPlots/master/SpeciesData/all-spp-attributes.csv")
