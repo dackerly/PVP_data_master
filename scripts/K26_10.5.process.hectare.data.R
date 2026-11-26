@@ -187,13 +187,13 @@ length(which(is.na(htAll$DBH_cm.17)))
 a15p18 <- which(is.na(htAll$Plot.15) & !is.na(htAll$Plot.18) & htAll$Plot.18!='PPW1352')
 length(a15p18)
 htAll[a15p18,c('Num','Plot','Species','DBH_cm.17','Plot.18','Species.18','DBH_cm.18')]
-write.csv(htAll[a15p18,],'data/abs15pres18.csv')
+write.csv(htAll[a15p18,],'tmp/abs15pres18.csv')
 
 # how many missing in 2018
 tmp <- which(!is.na(htAll$Plot.15) & is.na(htAll$Plot.18))
 length(tmp)
 htAll[tmp,c('Num','Plot.15','Species.15','DBH_cm.15','Plot.18','Species.18','DBH_cm.18')]
-write.csv(htAll[tmp,],'data/pres15abs18.csv')
+write.csv(htAll[tmp,],'tmp/pres15abs18.csv')
 
 # how many under 20 cm and are main stems
 dbhlt20 <- which(htAll$DBH_cm.17<20 & htAll$Num==htAll$TreeNum)
@@ -295,7 +295,7 @@ htAll$UTM.N.17[which(!is.na(htAll$UTM.N.18))] <- htAll$UTM.N.18[which(!is.na(htA
 plot(htAll$UTM.E.17,htAll$UTM.N.17,asp=1)
 
 # read plot coordinates
-htc <- read.csv('input_data/plot_info/hectares-18-20m-FS.csv')
+htc <- read.csv('indata/hectares-18-20m-FS.csv')
 head(htc)
 htc$Plot.Orig <- htc$Plot
 substr(htc$Plot,4,5) <- '13'
@@ -312,7 +312,6 @@ drawBox <- function(b,exlim=50,plot=NULL) {
   points(b[2],b[4],pch=19,cex=2,col='red')
 }
 
-htAll[htAll$Num==11120,c('UTM.E.18')]
 plot.list <- sort(unique(htc$Plot))
 i=1
 for (i in 1:length(plot.list)) {
@@ -385,7 +384,7 @@ abline(h=c(0,100))
 abline(v=c(0,100))
 
 # output file with outliers - most are within 5 m of edge and not considered an issue
-write.csv(htAll[which(htAll$coordOutlier==1),c('Plot','Num','Species','Rel.UTM.E.17','Rel.UTM.N.17','UTM.E.15','UTM.N.15','UTM.E.18','UTM.N.18')],'data/hectCoordOutliers.csv')
+write.csv(htAll[which(htAll$coordOutlier==1),c('Plot','Num','Species','Rel.UTM.E.17','Rel.UTM.N.17','UTM.E.15','UTM.N.15','UTM.E.18','UTM.N.18')],'tmp/hectCoordOutliers.csv')
 
 # Now move near outliers to nearest plot and create Subplot.Orig vars
 table(htAll$Subplot.17)
@@ -449,5 +448,5 @@ table(htAll$Plot.Orig,useNA='a')
 
 
 ## SAVE
-saveRDS(htAll,'data/hectares.rds')
+saveRDS(htAll,'bigdata/hectares.rds')
 
