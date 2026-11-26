@@ -473,6 +473,24 @@ htAll$Tubbs.MTBS.RDNBR <- hfs$fsvar[match(htAll$Plot,hfs$Plot)]
 hist(htAll$Tubbs.MTBS.RDNBR)
 boxplot(Tubbs.MTBS.RDNBR~Tubbs.MTBS.RDNBR.Cat,data=htAll)
 
+# Now Kincade
+hfs <- loadFireSeverity(hfs,fsmet='Kincade.MTBS.RDNBR.30',fire='Kincade',verbose=T)
+head(hfs)
+head(hfs[,c('Plot','fsvar','fsCat')])
+tail(hfs[,c('Plot','fsvar','fsCat')])
+table(hfs$fsCat,useNA='a')
+
+htAll$Kincade.MTBS.RDNBR.Cat <- NA
+htAll$Kincade.MTBS.RDNBR.Cat <- hfs$fsCat[match(htAll$Plot,hfs$Plot)]
+table(htAll$Kincade.MTBS.RDNBR.Cat,useNA='always')
+
+htAll$Kincade.MTBS.RDNBR <- NA
+htAll$Kincade.MTBS.RDNBR <- hfs$fsvar[match(htAll$Plot,hfs$Plot)]
+hist(htAll$Kincade.MTBS.RDNBR)
+boxplot(Kincade.MTBS.RDNBR~Kincade.MTBS.RDNBR.Cat,data=htAll)
+
+table(htAll$Tubbs.MTBS.RDNBR.Cat,htAll$Kincade.MTBS.RDNBR.Cat)
+
 ## SAVE
 saveRDS(htAll,'bigdata/tmp/hectares.rds')
 

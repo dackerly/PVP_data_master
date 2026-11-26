@@ -684,19 +684,18 @@ head(fs)
 tail(fs)
 dim(fs)
 
-fs <- loadFireSeverity(fs,'Tubbs.MTBS.RDNBR.30',verbose=T)
-head(fs)
-head(fs[,c('Plot','fsvar','fsCat')])
-tail(fs[,c('Plot','fsvar','fsCat')])
-table(fs$fsCat)
-
-table(fs$fsCat)
-
 # add fire severity to tAll
 table(tAll$Plot,useNA='always')
 table(tAll$Plot.Orig,useNA='always')
 fs$Plot.Orig <- fs$Plot
 substr(fs$Plot,4,5) <- '13'
+
+fs <- loadFireSeverity(fs,fsmet='Tubbs.MTBS.RDNBR.30',fire='Tubbs',verbose=T)
+head(fs)
+head(fs[,c('Plot','fsvar','fsCat')])
+tail(fs[,c('Plot','fsvar','fsCat')])
+table(fs$fsCat)
+
 tAll$Tubbs.MTBS.RDNBR.Cat <- NA
 tAll$Tubbs.MTBS.RDNBR.Cat <- fs$fsCat[match(tAll$Plot,fs$Plot)]
 table(tAll$Tubbs.MTBS.RDNBR.Cat,useNA='always')
@@ -705,6 +704,24 @@ tAll$Tubbs.MTBS.RDNBR <- NA
 tAll$Tubbs.MTBS.RDNBR <- fs$fsvar[match(tAll$Plot,fs$Plot)]
 hist(tAll$Tubbs.MTBS.RDNBR)
 boxplot(Tubbs.MTBS.RDNBR~Tubbs.MTBS.RDNBR.Cat,data=tAll)
+
+# Now Kincade
+fs <- loadFireSeverity(fs,fsmet='Kincade.MTBS.RDNBR.30',fire='Kincade',verbose=T)
+head(fs)
+head(fs[,c('Plot','fsvar','fsCat')])
+tail(fs[,c('Plot','fsvar','fsCat')])
+table(fs$fsCat,useNA='a')
+
+tAll$Kincade.MTBS.RDNBR.Cat <- NA
+tAll$Kincade.MTBS.RDNBR.Cat <- fs$fsCat[match(tAll$Plot,fs$Plot)]
+table(tAll$Kincade.MTBS.RDNBR.Cat,useNA='always')
+
+tAll$Kincade.MTBS.RDNBR <- NA
+tAll$Kincade.MTBS.RDNBR <- fs$fsvar[match(tAll$Plot,fs$Plot)]
+hist(tAll$Kincade.MTBS.RDNBR)
+boxplot(Kincade.MTBS.RDNBR~Kincade.MTBS.RDNBR.Cat,data=tAll)
+
+table(tAll$Tubbs.MTBS.RDNBR.Cat,tAll$Kincade.MTBS.RDNBR.Cat)
 
 # Save the updated data file
 write.csv(tAll,'bigdata/tmp/tAllPlot.csv')
