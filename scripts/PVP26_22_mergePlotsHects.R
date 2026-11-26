@@ -22,12 +22,12 @@ source_https('https://raw.githubusercontent.com/dackerly/PepperwoodVegPlots/mast
 ########
 
 # read in plot data; file prepped by K26_10 and K26_20
-tAll <- read.csv('data/tAllPlot.csv')
+tAll <- read.csv('bigdata/tmp/tAllPlot.csv')
 dim(tAll)
 names(tAll)
 
 # Read in Hectare data. This data file is cleaned and prepared in KR26_10.5.process.hectare.data.R
-htAll <- readRDS('data/hectares.rds')
+htAll <- readRDS('bigdata/tmp/hectares.rds')
 names(htAll)
 dim(htAll)
 
@@ -62,7 +62,7 @@ pw$Dead.17 <- pw$Live.17-1 # fixed missing Dead value for hectare plants
 
 ###### Add fire severity data
 # Manual load from csvs disabled, as this was moved to function
-fs <- read.csv("https://raw.githubusercontent.com/dackerly/PepperwoodFireSeverity/master/data/FSextract/vegplots-54-20m-FS.csv")
+fs <- read.csv("indata/vegplots-54-20m-FS.csv")
 head(fs)
 tail(fs)
 dim(fs)
@@ -73,7 +73,7 @@ head(fs[,c('Plot','fsvar','fsCat')])
 tail(fs[,c('Plot','fsvar','fsCat')])
 table(fs$fsCat)
 
-hfs <- read.csv('input_data/plot_info/hectares-18-20m-FS.csv')
+hfs <- read.csv('indata/hectares-18-20m-FS.csv')
 hfs$Plot.Orig <- hfs$Plot
 substr(hfs$Plot,4,5) <- '13'
 names(hfs)[which(names(hfs)=='Quad')] <- 'Subplot'
@@ -161,7 +161,7 @@ table(pw$Tag.Pulled.Cum)
 
 ## EDIT AFTER MELINA FIX
 tp20comments <- which(pw$Tag.Pulled.20 %in% c('LOST','NEW SA','NOT FOUND','NOT FOUND IN 19 OR 20','NOT FOUND, DOSER KILL','TAG MOVED TO RSPRT','TYPE IN 19, NOT TR'))
-write.csv(pw[tp20comments,c('Plot','Num','Tag.Pulled.20')],'data/tp20problems.csv')
+write.csv(pw[tp20comments,c('Plot','Num','Tag.Pulled.20')],'tmp/tp20problems.csv')
 
 ## REMOVE UNNEEDED COLUMNS
 names(pw)
@@ -180,17 +180,17 @@ dim(dTab)
 for (i in 1:length(names(pw))) dTab[i,2:5] <- countData(i)
 head(dTab)
 tail(dTab)
-write.csv(dTab,'data/pwAllColNames.csv')
+write.csv(dTab,'tmp/pwAllColNames.csv')
 
 # plot large trees
 LT <- which(pw$DBH_cm.17>=20)
 hp <- which(pw$hectPlot==1)
 rsel <- which(pw$DBH_cm.17>=20 & pw$hectPlot==1 & pw$coordOutlier==0)
 length(LT)
-plot(pw$Rel.UTM.E[rsel],pw$Rel.UTM.N[rsel])
+plot(pw$Rel.UTM.E[rsel],pw$Rel.UTM.N[rsel],asp=1)
 
 #colOrder <- c('Plot','Num','')
 
 ## Write final data set
 dim(pw)
-write.csv(pw,'data/pw.csv')
+write.csv(pw,'bigdata/masterdata/pvp26.csv')

@@ -25,7 +25,7 @@ source_https('https://raw.githubusercontent.com/dackerly/PepperwoodVegPlots/mast
 
 # read in list of 4 data frames, each one with the full data file for all trees in a given year. We are using individual points for analysis in this paper (hence 'allidb.Rdata')
 years <- c(2013,2018,2019,2020)
-all.id <- readRDS('bigdata/allidb.rds')
+all.id <- readRDS('bigdata/tmp/allidb.rds')
 str(all.id)
 
 # Print dups for each year. And for now, remove dups before checking for other problems, e.g. moving between plots, species, etc.
@@ -680,5 +680,5 @@ substr(tAll$Plot,4,5) <- '13'
 ## ADD FIRE SEVERITY HERE, FOR TUBBS AND KINCADE
 
 # Save the updated data file
-write.csv(tAll,'bigdata/tAllPlot.csv')
+write.csv(tAll,'bigdata/tmp/tAllPlot.csv')
 
