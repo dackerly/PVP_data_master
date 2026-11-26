@@ -287,6 +287,32 @@ tAll$Plot[which(is.na(tAll$Plot))] <- tAll$Plot.19[which(is.na(tAll$Plot))]
 tAll$Plot[which(is.na(tAll$Plot))] <- tAll$Plot.20[which(is.na(tAll$Plot))]
 table(tAll$Plot,useNA='always')
 
+### Read in species codes - in this script, called 'Species'
+spAtt <- read.csv("https://raw.githubusercontent.com/dackerly/PepperwoodVegPlots/master/SpeciesData/all-spp-attributes.csv")
+
+dim(spAtt)
+head(spAtt)
+tail(spAtt)
+table(spAtt$FuncGroup)
+
+### convert Species# convert QUEBEGA to QUEBER, QUEDOGA to QUEDOU, QUEdec, QUEDEC to QUEDOU, and remove unknowns and BACPIL
+# # Baccharis was removed from analysis and dropped from ongoing surveys, due to rapid resprouting which made it difficult to evaluate fire impacts.
+table(tAll$Species)
+tAll$Species[which(tAll$Species=='QUEBEGA')] <- 'QUEBER' # potential hybrids assigned to BER
+tAll$Species[which(tAll$Species=='QUEDOGA')] <- 'QUEDOU' # potential hybrids assigned to DOU
+tAll$Species[which(tAll$Species %in% c('QUEdec','QUEDEC'))] <- 'QUEDEC' # indet deciduous assigned to DOUG
+tAll <- tAll[-which(tAll$Species %in% c('BACPIL')),]
+table(tAll$Species)
+dim(tAll)
+
+### Add functional groups to tAll
+### Are all species in spAtt? YES
+(tAllspec <- sort(unique(tAll$Species)))
+tAllspec[which(!tAllspec %in% spAtt$OrigSpecies)]
+
+tAll$FuncGroup <- spAtt$FuncGroup[match(tAll$Species,spAtt$OrigSpecies)]
+table(tAll$FuncGroup)
+
 # remove year by year Species columns
 ncol(tAll)
 tAll <- tAll[,-which(names(tAll) %in% c('Species.13','Species.17','Species.18','Species.19','Species.20'))]
@@ -725,6 +751,22 @@ boxplot(Kincade.MTBS.RDNBR~Kincade.MTBS.RDNBR.Cat,data=tAll)
 
 table(tAll$Tubbs.MTBS.RDNBR.Cat,tAll$Kincade.MTBS.RDNBR.Cat)
 
+# Calculate prefire basal area at breast height (BABH) and at 10 cm stem height (BAd10.17)
+tAll$BABH.17 <- pi*(tAll$DBH_cm.17/2^2)
+tAll$BAd10.17 <- pi*(tAll$d10.17/2^2)
+
+# assign cumulative tag pulled variable - run again after fixing 2020 - Melina
+tAll$Tag.Pulled.Cum <- 0
+tAll$Tag.Pulled.Cum[which(tAll$Tag.Pulled.18==1)] <- 1
+tAll$Tag.Pulled.Cum[which(tAll$Tag.Pulled.19==1)] <- 1
+tAll$Tag.Pulled.Cum[which(tAll$Tag.Pulled.20=="1")] <- 1
+tAll$Tag.Pulled.Cum[which(tAll$Num>=99000)] <- 1
+table(tAll$Tag.Pulled.Cum)
+
+## EDIT AFTER MELINA FIX
+tp20comments <- which(tAll$Tag.Pulled.20 %in% c('LOST','NEW SA','NOT FOUND','NOT FOUND IN 19 OR 20','NOT FOUND, DOSER KILL','TAG MOVED TO RSPRT','TYPE IN 19, NOT TR'))
+write.csv(tAll[tp20comments,c('Plot','Num','Tag.Pulled.20')],'tmp/tp20problems.csv')
+
 # reorder
 names(tAll)
 length(names(tAll))
@@ -741,5 +783,5 @@ tAll <- tAll[,c(noy,y13,y17,y18,y19,y20)]
 names(tAll)
 
 # Save the updated data file
-write.csv(tAll,'bigdata/tmp/tAllPlot.csv')
+write.csv(tAll,'bigdata/tmp/plotAll.csv')
 

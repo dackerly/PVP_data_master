@@ -178,17 +178,10 @@ htAll[which.max(htAll$DBH_cm.18),]
 tmp0 <- which(htAll$DBH_cm.18==0)
 htAll$DBH_cm.18[tmp0] <- NA
 
-htAll$DBH_cm.17 <- htAll$DBH_cm.18
-length(which(is.na(htAll$DBH_cm.17)))
-table(htAll$Plot[which(is.na(htAll$DBH_cm.17))])
-
-htAll$DBH_cm.17[which(is.na(htAll$DBH_cm.17))] <- htAll$DBH_cm.15[which(is.na(htAll$DBH_cm.17))]
-length(which(is.na(htAll$DBH_cm.17)))
-
 # how many missing in 2015 and present in 2018
 a15p18 <- which(is.na(htAll$Plot.15) & !is.na(htAll$Plot.18) & htAll$Plot.18!='PPW1352')
 length(a15p18)
-htAll[a15p18,c('Num','Plot','Species','DBH_cm.17','Plot.18','Species.18','DBH_cm.18')]
+htAll[a15p18,c('Num','Plot.15','Species.15','DBH_cm.15','Plot.18','Species.18','DBH_cm.18')]
 write.csv(htAll[a15p18,],'tmp/abs15pres18.csv')
 
 # how many missing in 2018
@@ -197,8 +190,26 @@ length(tmp)
 htAll[tmp,c('Num','Plot.15','Species.15','DBH_cm.15','Plot.18','Species.18','DBH_cm.18')]
 write.csv(htAll[tmp,],'tmp/pres15abs18.csv')
 
+# CREATE 2017 proxy vars
+htAll$DBH_cm.17 <- htAll$DBH_cm.18
+length(which(is.na(htAll$DBH_cm.17)))
+table(htAll$Plot[which(is.na(htAll$DBH_cm.17))])
+
+htAll$DBH_cm.17[which(is.na(htAll$DBH_cm.17))] <- htAll$DBH_cm.15[which(is.na(htAll$DBH_cm.17))]
+length(which(is.na(htAll$DBH_cm.17)))
+
+# assign basal diameter
+#D10 = DBH.cm * 1.176 + 1.070
+htAll$d10.17 <- htAll$DBH_cm.17*1.176 + 1.07
+plot(htAll$DBH_cm.17,htAll$d10.17)
+
+# Assign all trees alive before the fire, all are Type='TR', and assign integer TreeNums
+htAll$Live.17 <- 1
+htAll$Type.17 <- 'TR'
+
+
 # how many under 20 cm and are main stems
-dbhlt20 <- which(htAll$DBH_cm.17<20 & htAll$Num==htAll$TreeNum)
+dbhlt20 <- which(htAll$DBH_cm.17<20 & htAll$PointNum==0)
 length(dbhlt20)
 
 range(htAll$DBH_cm.17[dbhlt20],useNA=T)
@@ -263,15 +274,6 @@ htAll[tmp,c('Num','Plot','Species','DBH_cm.17','Survival.18','Basal.18','ExcStem
 
 # fate of trees missing in 2015 and found in 2018
 htAll[a15p18,c('Num','Species','Plot','DBH_cm.17','fate3.18','ExcStem')]
-
-# assign basal diameter
-#D10 = DBH.cm * 1.176 + 1.070
-htAll$d10.17 <- htAll$DBH_cm.17*1.176 + 1.07
-plot(htAll$DBH_cm.17,htAll$d10.17)
-
-# Assign all trees alive before the fire, all are Type='TR', and assign integer TreeNums
-htAll$Live.17 <- 1
-htAll$Type.17 <- 'TR'
 
 # any obviously problematic fates records
 table(htAll$Apical.18,htAll$Epicormic.18,htAll$Survival.18)
@@ -375,6 +377,7 @@ for (i in 1:length(plot.list)) {
 }
 
 table(htAll$Subplot.17)
+table(htAll$Species)
 
 # outliers classified as more than 3 m from the adjusted edge
 htAll$coordOutlier[which(htAll$Rel.UTM.E.17<c(-3) | 
@@ -433,8 +436,9 @@ plot(htAll$UTM.E.17,htAll$UTM.N.17,asp=1)
 points(htAll[which(htAll$coordOutlier==1),c('UTM.E.17','UTM.N.17')],col='red')
 
 plot(htAll$Rel.UTM.E.17,htAll$Rel.UTM.N.17,asp=1)
+points(htAll[which(htAll$coordOutlier==1),c('Rel.UTM.E.17','Rel.UTM.N.17')],col='red')
 
-# identifyPlot# identify this datanoUTM18# identify this data set as hectares
+# identify this data set as hectares
 htAll$Survey <- 'Hect'
 htAll$hectPlot <- 1
 head(htAll)
@@ -512,8 +516,42 @@ names(htAll)
 htAll <- htAll[,c(noy,y15,y17,y18)]
 names(htAll)
 
+table(htAll$Species,htAll$ExcStem)
+
+### Read in Species### Read in species codes - in this script, called 'Species'
+spAtt <- read.csv("https://raw.githubusercontent.com/dackerly/PepperwoodVegPlots/master/SpeciesData/all-spp-attributes.csv")
+
+dim(spAtt)
+head(spAtt)
+tail(spAtt)
+table(spAtt$FuncGroup)
+
+### convert QUEDEC to all caps
+table(htAll$Species)
+htAll$Species[which(htAll$Species %in% c('QUEdec','QUEDEC'))] <- 'QUEDEC' # indet deciduous assigned to DOUG
+table(htAll$Species)
+dim(htAll)
+
+### Add functional groups to tAll
+### Are all species in spAtt? YES
+(tAllspec <- sort(unique(htAll$Species)))
+tAllspec[which(!tAllspec %in% spAtt$OrigSpecies)]
+
+htAll$FuncGroup <- spAtt$FuncGroup[match(htAll$Species,spAtt$OrigSpecies)]
+table(htAll$FuncGroup)
+
+# Calculate prefire basal area at breast height (BABH) and at 10 cm stem height (BAd10.17)
+htAll$BABH.17 <- pi*(htAll$DBH_cm.17/2^2)
+htAll$BAd10.17 <- pi*(htAll$d10.17/2^2)
+
+# assign cumulative tag pulled variable - run again after fixing 2020 - Melina
+htAll$Tag.Pulled.Cum <- 0
+htAll$Tag.Pulled.Cum[which(htAll$Tag.Pulled.18==1)] <- 1
+htAll$Tag.Pulled.Cum[which(htAll$Num>=99000)] <- 1
+table(htAll$Tag.Pulled.Cum)
+
 # Add in plot trees, from plot master data. 
-tAll <- read.csv('bigdata/tmp/tAllPlot.csv')
+tAll <- read.csv('bigdata/tmp/plotAll.csv')
 pin <- read.csv('indata/plot.info.2026.csv')
 head(pin)
 tAll <- tAll[which(tAll$Plot %in% pin$Plot[which(pin$Super.Plot==1)]),]
@@ -543,7 +581,7 @@ dim(tAll)
 dim(htAll)
 names(tAll) == names(htAll)
 names(tAll) <- names(htAll)
-head(tAll[,c('Rel.UTM.E','Rel.UTM.N')])
+
 htAll <- rbind(htAll,tAll)
 dim(htAll)
 tail(htAll)
@@ -551,6 +589,7 @@ tail(tAll)
 
 plot(htAll$Rel.UTM.E,htAll$Rel.UTM.N,asp=1)
 
+(tmp <- table(htAll$Survey,htAll$Species))
 table(htAll$Survey,htAll$PointNum)
 
 ## SAVE
