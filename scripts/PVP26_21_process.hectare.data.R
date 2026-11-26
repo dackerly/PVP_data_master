@@ -46,15 +46,17 @@ table(ht16$Plot)
 table(ht16$Plot.Orig)
 table(ht16$Subplot)
 
-# it looks like trees from Plots are included in this hectare data
+# it looks like trees from Plots are included in this hectare data. 
 plot.trees <- grep('from offset',ht16$Accuracy)
 length(plot.trees)
 range(ht16$Num[plot.trees])
 range(ht16$Num[-plot.trees],na.rm=T)
 
-#remove plot trees from hectare data
+# Looking at dbhs it's apparent that the data was copied over from the Plot data sheets. These will be removed here, and then added back later from the processed Plot data (esp. to get correct UTMs)
+
+#remove plot trees from hectare data, if desired.
 dim(ht16)
-ht16 <- ht16[-plot.trees,]
+ht16 <- ht16[-plot.trees, ]
 head(ht16)
 dim(ht16)
 
@@ -83,10 +85,10 @@ ht18$sDate <- 2018.5
 
 # it looks like trees from original Plots are included in this hectare data
 plot.trees <- which(ht18$Num<7000)
-length(plot.trees)
+length(plot.trees) # only five
 ht18[plot.trees,]
 
-#remove from hectare data
+# remove from hectare data. These will be readded later, from Plot data
 ht18 <- ht18[-plot.trees,]
 head(ht18)
 dim(ht18)
@@ -143,7 +145,7 @@ names(htAll)
 
 # create TreeNum and Points vars
 htAll$TreeNum <- floor(htAll$Num)
-htAll$PointNum <- htAll$Num-htAll$TreeNum
+htAll$PointNum <- round(htAll$Num-htAll$TreeNum,2)
 
 # QC - trees that have changed plots
 misPlot <- (which(htAll$Plot.15!=htAll$Plot.18))
@@ -498,6 +500,59 @@ boxplot(Kincade.MTBS.RDNBR~Kincade.MTBS.RDNBR.Cat,data=htAll)
 
 table(htAll$Tubbs.MTBS.RDNBR.Cat,htAll$Kincade.MTBS.RDNBR.Cat)
 
+# reorder
+names(htAll)
+y15 <- grep('.15',names(htAll))
+y17 <- grep('.17',names(htAll))
+y18 <- grep('.18',names(htAll))
+noy <- which(!c(1:length(names(htAll))) %in% c(y15,y17,y18))
+names(htAll)[noy]
+
+names(htAll)
+htAll <- htAll[,c(noy,y15,y17,y18)]
+names(htAll)
+
+# Add in plot trees, from plot master data. 
+tAll <- read.csv('bigdata/tmp/tAllPlot.csv')
+pin <- read.csv('indata/plot.info.2026.csv')
+head(pin)
+tAll <- tAll[which(tAll$Plot %in% pin$Plot[which(pin$Super.Plot==1)]),]
+tAll <- tAll[-which(tAll$Species=='HETARB'),]
+
+s13LT <- unique(tAll$TreeNum[which(tAll$DBH_cm.13>=20)])
+s18LT <- unique(tAll$TreeNum[which(tAll$DBH_cm.18>=20)])
+sLT <- union(s13LT,s18LT)
+length(s13LT);length(s18LT);length(intersect(s13LT,s18LT));length(sLT)
+plot(DBH_cm.18~DBH_cm.13,data=tAll[which(tAll$TreeNum %in% sLT & tAll$PointNum==0),])
+
+tAll <- tAll[which(tAll$TreeNum %in% sLT),]
+dim(tAll)
+names(tAll) <- gsub('.13','.15',names(tAll))
+names(tAll)
+tail(tAll)
+
+nht2nt <- match(names(htAll),names(tAll))
+tAll$NAcol <- NA
+names(tAll)
+nht2nt[which(is.na(nht2nt))] <- length(names(tAll))
+tAll <- tAll[,nht2nt]
+head(tAll)
+table(tAll$Plot)
+tail(tAll)
+dim(tAll)
+dim(htAll)
+names(tAll) == names(htAll)
+names(tAll) <- names(htAll)
+head(tAll[,c('Rel.UTM.E','Rel.UTM.N')])
+htAll <- rbind(htAll,tAll)
+dim(htAll)
+tail(htAll)
+tail(tAll)
+
+plot(htAll$Rel.UTM.E,htAll$Rel.UTM.N,asp=1)
+
+table(htAll$Survey,htAll$PointNum)
+
 ## SAVE
-saveRDS(htAll,'bigdata/tmp/hectares.rds')
+write.csv(htAll,'bigdata/tmp/hectAll.csv')
 

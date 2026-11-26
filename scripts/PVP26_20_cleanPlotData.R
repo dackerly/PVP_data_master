@@ -725,6 +725,21 @@ boxplot(Kincade.MTBS.RDNBR~Kincade.MTBS.RDNBR.Cat,data=tAll)
 
 table(tAll$Tubbs.MTBS.RDNBR.Cat,tAll$Kincade.MTBS.RDNBR.Cat)
 
+# reorder
+names(tAll)
+length(names(tAll))
+y13 <- grep('.13',names(tAll))
+y17 <- grep('.17',names(tAll))
+y18 <- grep('.18',names(tAll))
+y19 <- grep('.19',names(tAll))
+y20 <- grep('.20',names(tAll))
+noy <- which(!c(1:length(names(tAll))) %in% c(y13,y17,y18,y19,y20))
+length(c(noy,y13,y17,y18,y19,y20))
+
+names(tAll)
+tAll <- tAll[,c(noy,y13,y17,y18,y19,y20)]
+names(tAll)
+
 # Save the updated data file
 write.csv(tAll,'bigdata/tmp/tAllPlot.csv')
 
