@@ -118,6 +118,22 @@ kill.trees<-function(year,prefix='https://raw.githubusercontent.com/dackerly/Pep
   all.dead
 }
 
+## for troubleshooting, set defaults
+year=2018
+stump=F
+orig.dead=F
+survival=F
+bsprout=F
+epicormic=F
+apical=F
+canopy=F
+bsprout.height=F
+bsprout.count=F
+tag.pulled=F
+keep.999=F
+branches=F
+prefix='https://raw.githubusercontent.com/dackerly/PepperwoodVegPlots/master/'
+plot.list=NA
 ######################################################################
 ### get.indv.data() ### 
 ######################################################################
@@ -148,6 +164,7 @@ get.indv.data <- function(year, stump=F, orig.dead=F, survival=F, bsprout=F, epi
                                         substr(sample.date,7,8)
                                         ,sYear,sep='/'))),2)
   
+  i=1
   for (i in 1:length(mega.data)) 
   {
     Plot<-plot.list[i]
@@ -189,7 +206,8 @@ get.indv.data <- function(year, stump=F, orig.dead=F, survival=F, bsprout=F, epi
       mega.data[[i]]$sYear <- sYear[i]
       mega.data[[i]]$sDate <- sDate[i]
       # CLEAN UP COLUMN NAMES - 2013 COLUMNS CAN **NEVER** BE REORDERED, OR THIS LINE NEEDS TO BE EDITED!
-      colnames(mega.data[[i]])<-c("Plot", "Quad", "Type", "Num", "Species", "Confidence",
+      colnames(mega.data[[i]])<-c("Plot", "Quad", "Type", "Num",
+                                  "Species", "Confidence",
                                   "Dead.Stump", 
                                   "SA.Height_cm", "SA.BD_cm", 
                                   "SA.Stems", "DBH_cm", "X_cm", "Y_cm", "Notes","sYear","sDate") 
@@ -281,6 +299,7 @@ get.indv.data <- function(year, stump=F, orig.dead=F, survival=F, bsprout=F, epi
   
   # change coordinates to all be positive
   indv.data$Y_cm<-suppressWarnings(as.numeric(indv.data$Y_cm))
+  write.csv(indv.data[,c('Plot','Num','X_cm')],'tmp/xcm.csv')
   indv.data[which(indv.data$X_cm<c(-500)),"X_cm"]<-NA
   indv.data[which(indv.data$Y_cm<c(-500)),"Y_cm"]<-NA
   indv.data[which(indv.data$X_cm<0),"X_cm"]<-indv.data[which(indv.data$X_cm<0),"X_cm"]+500

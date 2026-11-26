@@ -36,12 +36,13 @@ head(sort(id13$Num))
 id13b <- get.indv.data(year = 2013,branches=T,stump=F,orig.dead=F)
 dim(id13b)
 head(id13b)
+names(id13b)
 head(sort(id13b$Num))
-id13b[id13b$Num==4518,]
 
 id18 <- get.indv.data(year = 2018,branches=F,keep.999 = T)
 dim(id18)
 head(id18)
+names(id18)
 
 id18b <- get.indv.data(year = 2018,branches=T,keep.999 = T)
 dim(id18b)
